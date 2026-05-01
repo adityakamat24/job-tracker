@@ -167,7 +167,11 @@ async def _async_main(args: argparse.Namespace) -> int:
     for j in new_jobs:
         state.insert(j, notified=args.bootstrap)
 
-    state.bulk_update_last_seen(accepted_ids & open_ids)
+    # bulk_update_last_seen UPDATEs `last_seen=now, closed_at=NULL`. Apply to
+    # ALL accepted ids (not just currently-open) so a previously-closed job
+    # that reappears gets its closed_at cleared on the same cycle it's
+    # re-notified. Otherwise closed_at sticks and the job re-pings every cycle.
+    state.bulk_update_last_seen(accepted_ids)
     state.bulk_close(closed_ids)
 
     notified_count = 0
