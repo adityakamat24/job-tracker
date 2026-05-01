@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import html
 import re
 
 _HTML_TAG = re.compile(r"<[^>]+>")
@@ -7,11 +8,59 @@ _WS = re.compile(r"\s+")
 
 
 def html_strip(text: str | None) -> str:
-    """Strip HTML tags and collapse whitespace. Used before sponsorship scan."""
+    """Strip HTML tags and collapse whitespace. Decodes HTML entities first
+    so `&lt;p&gt;` becomes `<p>` (then gets stripped) rather than slipping
+    through as visible mojibake."""
     if not text:
         return ""
-    cleaned = _HTML_TAG.sub(" ", text)
+    decoded = html.unescape(text)
+    cleaned = _HTML_TAG.sub(" ", decoded)
     return _WS.sub(" ", cleaned).strip()
+
+
+_COMP_RANGE = re.compile(
+    r"\$\s?(\d{2,3}(?:,\d{3})?[kK]?)\s*(?:-|–|—|to)\s*\$?\s?(\d{2,3}(?:,\d{3})?[kK]?)",
+    re.IGNORECASE,
+)
+
+
+def _to_dollars(s: str) -> int | None:
+    s = s.replace(",", "").lower()
+    if s.endswith("k"):
+        s = s[:-1]
+        try:
+            return int(s) * 1000
+        except ValueError:
+            return None
+    try:
+        return int(s)
+    except ValueError:
+        return None
+
+
+def _fmt_dollars(n: int) -> str:
+    if n % 1000 == 0:
+        return f"${n // 1000}k"
+    return f"${n:,}"
+
+
+def extract_comp(description: str | None) -> str | None:
+    """Find the first plausible USD salary range in `description`. Returns
+    formatted '$185k–$310k' style or None when nothing reasonable is found.
+
+    Conservative: requires both numbers >= $30k and hi >= lo, so we don't catch
+    things like '$5–$10 in stock' or hourly rates."""
+    if not description:
+        return None
+    for m in _COMP_RANGE.finditer(description):
+        lo = _to_dollars(m.group(1))
+        hi = _to_dollars(m.group(2))
+        if lo is None or hi is None:
+            continue
+        if lo < 30_000 or hi < 30_000 or hi < lo:
+            continue
+        return f"{_fmt_dollars(lo)}–{_fmt_dollars(hi)}"
+    return None
 
 
 # US state codes + names (lowercase). Includes DC.

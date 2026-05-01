@@ -8,12 +8,15 @@ from typing import Iterable
 import httpx
 
 from .models import Job
+from .utils import extract_comp
 
 log = logging.getLogger(__name__)
 
 API_BASE = "https://discord.com/api/v10"
 EMBEDS_PER_MESSAGE = 10  # Discord cap
 TIER_COLORS: dict[int, int] = {1: 5814783, 2: 5763719, 3: 10070709}
+TIER_EMOJI: dict[int, str] = {1: "🥇", 2: "🥈", 3: "🥉"}
+DESC_EXCERPT_CHARS = 220
 
 
 def _headers() -> dict[str, str]:
@@ -24,19 +27,50 @@ def _headers() -> dict[str, str]:
 
 
 def _format_embed(job: Job) -> dict:
-    fields = [
-        {"name": "Company", "value": (job.company or "?")[:1024], "inline": True},
-        {"name": "Location", "value": (job.location or "—")[:1024], "inline": True},
-    ]
-    if job.posted_at:
-        fields.append({"name": "Posted", "value": f"<t:{int(job.posted_at.timestamp())}:R>", "inline": True})
+    """One Discord embed per job. Optimised for skim-then-click:
+    - tier emoji prefix in the title
+    - subtitle with company/location/posted-time on a single line
+    - description excerpt (first ~220 chars of the JD) so the user can triage
+      without opening the link
+    - inline comp + team fields when extractable
+    - reaction-cheatsheet footer so the user remembers ✅ / 🚫 / 📝"""
 
+    emoji = TIER_EMOJI.get(job.tier, "•")
+    title = f"{emoji} {(job.title or 'Untitled')}"[:256]
+
+    subtitle_parts: list[str] = [f"**{job.company}**" if job.company else "**?**"]
+    if job.location:
+        subtitle_parts.append(job.location)
+    if job.posted_at:
+        subtitle_parts.append(f"<t:{int(job.posted_at.timestamp())}:R>")
+    description_text = " · ".join(subtitle_parts)
+
+    if job.description:
+        cleaned = job.description.strip()
+        excerpt = cleaned[:DESC_EXCERPT_CHARS].rstrip()
+        if len(cleaned) > DESC_EXCERPT_CHARS:
+            excerpt += "…"
+        description_text = f"{description_text}\n\n{excerpt}"
+
+    # Discord embed.description cap is 4096; we're well under.
+    description_text = description_text[:4096]
+
+    fields: list[dict] = []
+    comp = extract_comp(job.description)
+    if comp:
+        fields.append({"name": "💰 Comp", "value": comp, "inline": True})
+    if job.departments:
+        team = ", ".join(job.departments)
+        fields.append({"name": "🏷️ Team", "value": team[:1024], "inline": True})
+
+    footer = f"✅ applied  ·  🚫 skip  ·  📝 tailor   |   via {job.ats.value}  ·  {job.id}"
     return {
-        "title": (job.title or "Untitled")[:256],
+        "title": title,
         "url": job.url,
         "color": TIER_COLORS.get(job.tier, TIER_COLORS[3]),
+        "description": description_text,
         "fields": fields,
-        "footer": {"text": f"id:{job.id}"[:2048]},
+        "footer": {"text": footer[:2048]},
     }
 
 
