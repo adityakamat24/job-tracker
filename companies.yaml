@@ -1,0 +1,243 @@
+# Edit this file to add/remove companies. Each entry needs an `ats` and the
+# fields that ATS requires:
+#   greenhouse / ashby / lever / workable  →  token
+#   workday                                →  tenant + site (+ optional subdomain, default wd1)
+#
+# Hand-verify a token by hitting the public endpoint before committing:
+#   greenhouse:  https://boards-api.greenhouse.io/v1/boards/<token>/jobs
+#   ashby:       https://api.ashbyhq.com/posting-api/job-board/<token>
+#   lever:       https://api.lever.co/v0/postings/<token>?mode=json
+#   workable:    https://apply.workable.com/api/v1/widget/accounts/<token>
+#   workday:     POST https://<tenant>.<subdomain>.myworkdayjobs.com/wday/cxs/<tenant>/<site>/jobs
+#
+# Tier is used for sort order in the Discord digest and embed color
+# (1 = blue, 2 = green, 3 = grey).
+
+companies:
+  # ============================================================================
+  # === TIER 1: top targets (frontier AI, top hardware, top fintech, top eng) ==
+  # ============================================================================
+
+  # AI labs / model providers
+  - { name: Anthropic,           ats: greenhouse, token: anthropic,             tier: 1 }
+  - { name: OpenAI,              ats: ashby,      token: openai,                tier: 1 }
+  - { name: xAI,                 ats: greenhouse, token: xai,                   tier: 1 }
+  - { name: Mistral AI,          ats: ashby,      token: mistral,               tier: 1 }
+  - { name: Cohere,              ats: ashby,      token: cohere,                tier: 1 }
+  - { name: Perplexity,          ats: ashby,      token: perplexity,            tier: 1 }
+  - { name: Hugging Face,        ats: workable,   token: huggingface,           tier: 1 }
+
+  # Inference infra / serving / GPU clouds
+  - { name: Modal,               ats: ashby,      token: modal,                 tier: 1 }
+  - { name: Baseten,             ats: ashby,      token: baseten,               tier: 1 }
+  - { name: Anyscale,            ats: ashby,      token: anyscale,              tier: 1 }
+  - { name: Fireworks AI,        ats: greenhouse, token: fireworksai,           tier: 1 }
+  - { name: Together AI,         ats: greenhouse, token: togetherai,            tier: 1 }
+  - { name: CoreWeave,           ats: greenhouse, token: coreweave,             tier: 1 }
+  - { name: Crusoe,              ats: ashby,      token: crusoe,                tier: 1 }
+  - { name: Lambda Labs,         ats: ashby,      token: lambda,                tier: 1 }
+
+  # Hardware / accelerators / robotics
+  - { name: NVIDIA,              ats: workday,    tenant: nvidia, site: NVIDIAExternalCareerSite, subdomain: wd5, tier: 1 }
+  - { name: Cerebras,            ats: greenhouse, token: cerebrassystems,       tier: 1 }
+  - { name: SambaNova,           ats: greenhouse, token: sambanovasystems,      tier: 1 }
+  - { name: Tenstorrent,         ats: greenhouse, token: tenstorrent,           tier: 1 }
+  - { name: Lightmatter,         ats: greenhouse, token: lightmatter,           tier: 1 }
+  - { name: Neuralink,           ats: greenhouse, token: neuralink,             tier: 1 }
+
+  # Vector DBs / agent platforms / dev tools
+  - { name: Cursor,              ats: ashby,      token: cursor,                tier: 1 }
+  - { name: Pinecone,            ats: ashby,      token: pinecone,              tier: 1 }
+  - { name: Weaviate,            ats: ashby,      token: weaviate,              tier: 1 }
+
+  # Big-tech / fintech top targets
+  - { name: Stripe,              ats: greenhouse, token: stripe,                tier: 1 }
+  - { name: Brex,                ats: greenhouse, token: brex,                  tier: 1 }
+  - { name: Coinbase,            ats: greenhouse, token: coinbase,              tier: 1 }
+  - { name: Jane Street,         ats: greenhouse, token: janestreet,            tier: 1 }
+
+  # ============================================================================
+  # === TIER 2: well-funded, established eng-heavy ==============================
+  # ============================================================================
+
+  # AI / ML applications & research
+  - { name: Character AI,        ats: ashby,      token: character,             tier: 2 }
+  - { name: AI2 (Allen Institute), ats: greenhouse, token: thealleninstitute,   tier: 2 }
+  - { name: Replit,              ats: ashby,      token: replit,                tier: 2 }
+  - { name: ContextualAI,        ats: ashby,      token: contextual,            tier: 2 }
+  - { name: Reka,                ats: ashby,      token: reka,                  tier: 2 }
+  - { name: Liquid AI,           ats: ashby,      token: liquid-ai,             tier: 2 }
+  - { name: Inflection,          ats: greenhouse, token: inflectionai,          tier: 2 }
+  - { name: Poolside,            ats: ashby,      token: poolside,              tier: 2 }
+  - { name: Black Forest Labs,   ats: greenhouse, token: blackforestlabs,       tier: 2 }
+  - { name: Writer,              ats: ashby,      token: writer,                tier: 2 }
+  - { name: DeepL,               ats: ashby,      token: deepl,                 tier: 2 }
+
+  # Generative media
+  - { name: Runway,              ats: ashby,      token: runway-ml,             tier: 2 }
+  - { name: ElevenLabs,          ats: ashby,      token: elevenlabs,            tier: 2 }
+  - { name: Suno,                ats: ashby,      token: suno,                  tier: 2 }
+  - { name: Pika,                ats: ashby,      token: pika,                  tier: 2 }
+  - { name: Synthesia,           ats: ashby,      token: synthesia,             tier: 2 }
+  - { name: HeyGen,              ats: greenhouse, token: heygen,                tier: 2 }
+  - { name: Tavus,               ats: ashby,      token: tavus,                 tier: 2 }
+  - { name: Twelve Labs,         ats: ashby,      token: twelve-labs,           tier: 2 }
+  - { name: Cartesia,            ats: ashby,      token: cartesia,              tier: 2 }
+
+  # Agent / vertical AI
+  - { name: Sierra,              ats: ashby,      token: sierra,                tier: 2 }
+  - { name: Decagon,             ats: ashby,      token: decagon,               tier: 2 }
+  - { name: Cresta,              ats: greenhouse, token: cresta,                tier: 2 }
+  - { name: Harvey,              ats: ashby,      token: harvey,                tier: 2 }
+  - { name: Hebbia,              ats: greenhouse, token: hebbia,                tier: 2 }
+  - { name: Klarity AI,          ats: ashby,      token: klarity-ai,            tier: 2 }
+
+  # AI infra / dev tools
+  - { name: LangChain,           ats: ashby,      token: langchain,             tier: 2 }
+  - { name: LlamaIndex,          ats: ashby,      token: llamaindex,            tier: 2 }
+  - { name: Sweep,               ats: ashby,      token: sweep,                 tier: 2 }
+  - { name: Continue,            ats: ashby,      token: continue,              tier: 2 }
+  - { name: Cline,               ats: greenhouse, token: cline,                 tier: 2 }
+  - { name: Sentry,              ats: ashby,      token: sentry,                tier: 2 }
+  - { name: Honeycomb,           ats: greenhouse, token: honeycomb,             tier: 2 }
+  - { name: PostHog,             ats: ashby,      token: posthog,               tier: 2 }
+  - { name: PagerDuty,           ats: greenhouse, token: pagerduty,             tier: 2 }
+
+  # Data infra / vector / databases
+  - { name: ClickHouse,          ats: greenhouse, token: clickhouse,            tier: 2 }
+  - { name: MongoDB,             ats: greenhouse, token: mongodb,               tier: 2 }
+  - { name: Confluent,           ats: ashby,      token: confluent,             tier: 2 }
+  - { name: Datadog,             ats: greenhouse, token: datadog,               tier: 2 }
+  - { name: Materialize,         ats: greenhouse, token: materialize,           tier: 2 }
+  - { name: Supabase,            ats: ashby,      token: supabase,              tier: 2 }
+  - { name: Neon,                ats: ashby,      token: neon,                  tier: 2 }
+  - { name: MotherDuck,          ats: ashby,      token: motherduck,            tier: 2 }
+  - { name: LanceDB,             ats: ashby,      token: lancedb,               tier: 2 }
+  - { name: Turbopuffer,         ats: ashby,      token: turbopuffer,           tier: 2 }
+  - { name: Fivetran,            ats: greenhouse, token: fivetran,              tier: 2 }
+  - { name: Airbyte,             ats: ashby,      token: airbyte,               tier: 2 }
+  - { name: Prefect,             ats: ashby,      token: prefect,               tier: 2 }
+  - { name: Unstructured,        ats: ashby,      token: unstructured,          tier: 2 }
+  - { name: Neptune AI,          ats: greenhouse, token: neptuneai,             tier: 2 }
+  - { name: Vast.ai,             ats: greenhouse, token: vastai,                tier: 2 }
+
+  # Hardware / accelerators / autonomous / biotech
+  - { name: MatX,                ats: greenhouse, token: matx,                  tier: 2 }
+  - { name: Graphcore,           ats: greenhouse, token: graphcore,             tier: 2 }
+  - { name: Apptronik,           ats: greenhouse, token: apptronik,             tier: 2 }
+  - { name: Figure,              ats: ashby,      token: figure,                tier: 2 }
+  - { name: Wayve,               ats: greenhouse, token: wayve,                 tier: 2 }
+  - { name: Nuro,                ats: greenhouse, token: nuro,                  tier: 2 }
+  - { name: Motional,            ats: greenhouse, token: motional,              tier: 2 }
+  - { name: Inceptive,           ats: greenhouse, token: inceptive,             tier: 2 }
+  - { name: Isomorphic Labs,     ats: greenhouse, token: isomorphiclabs,        tier: 2 }
+  - { name: Relay Therapeutics,  ats: lever,      token: relay,                 tier: 2 }
+
+  # Big tech / SaaS
+  - { name: Databricks,          ats: greenhouse, token: databricks,            tier: 2 }
+  - { name: Scale AI,            ats: greenhouse, token: scaleai,               tier: 2 }
+  - { name: Notion,              ats: ashby,      token: notion,                tier: 2 }
+  - { name: Linear,              ats: ashby,      token: linear,                tier: 2 }
+  - { name: Vercel,              ats: greenhouse, token: vercel,                tier: 2 }
+  - { name: Netlify,             ats: greenhouse, token: netlify,               tier: 2 }
+  - { name: Render,              ats: ashby,      token: render,                tier: 2 }
+  - { name: GitLab,              ats: greenhouse, token: gitlab,                tier: 2 }
+  - { name: Klaviyo,             ats: greenhouse, token: klaviyo,               tier: 2 }
+  - { name: Reddit,              ats: greenhouse, token: reddit,                tier: 2 }
+  - { name: Discord,             ats: greenhouse, token: discord,               tier: 2 }
+  - { name: Roblox,              ats: greenhouse, token: roblox,                tier: 2 }
+  - { name: Twitch,              ats: greenhouse, token: twitch,                tier: 2 }
+  - { name: Pinterest,           ats: greenhouse, token: pinterest,             tier: 2 }
+  - { name: Lyft,                ats: greenhouse, token: lyft,                  tier: 2 }
+  - { name: Dropbox,             ats: greenhouse, token: dropbox,               tier: 2 }
+  - { name: Squarespace,         ats: greenhouse, token: squarespace,           tier: 2 }
+  - { name: Flexport,            ats: greenhouse, token: flexport,              tier: 2 }
+
+  # Fintech
+  - { name: Modern Treasury,     ats: ashby,      token: moderntreasury,        tier: 2 }
+  - { name: Fireblocks,          ats: greenhouse, token: fireblocks,            tier: 2 }
+  - { name: Carta,               ats: greenhouse, token: carta,                 tier: 2 }
+  - { name: SoFi,                ats: greenhouse, token: sofi,                  tier: 2 }
+
+  # Security
+  - { name: Wiz,                 ats: ashby,      token: wiz,                   tier: 2 }
+  - { name: Okta,                ats: greenhouse, token: okta,                  tier: 2 }
+  - { name: 1Password,           ats: ashby,      token: 1password,             tier: 2 }
+  - { name: Zscaler,             ats: greenhouse, token: zscaler,               tier: 2 }
+
+  # ============================================================================
+  # === TIER 3: smaller / less-known but reputable ==============================
+  # ============================================================================
+
+  - { name: Imbue,               ats: greenhouse, token: imbue,                 tier: 3 }
+  - { name: Hume AI,             ats: greenhouse, token: humeai,                tier: 3 }
+  - { name: Granola,             ats: ashby,      token: granola,               tier: 3 }
+  - { name: Captions,            ats: ashby,      token: mirage,                tier: 3 }
+  - { name: Variant Bio,         ats: greenhouse, token: variantbio,            tier: 3 }
+  - { name: Synthego,            ats: lever,      token: synthego,              tier: 3 }
+  - { name: Airbnb,              ats: greenhouse, token: airbnb,                tier: 3 }
+  - { name: Figma,               ats: greenhouse, token: figma,                 tier: 3 }
+  - { name: KRAFTON,             ats: greenhouse, token: krafton,               tier: 3 }
+
+# ==============================================================================
+# === TODO: verify tokens / find correct ATS ===================================
+# ==============================================================================
+# Companies known to be hiring but didn't resolve to Greenhouse/Ashby/Lever/
+# Workable on first try, OR the public ATS endpoint requires authentication
+# (Workday tenants where the `<site>` slug is non-obvious).
+#
+# Many of these are KNOWN Workday users — to add them, find the URL pattern
+# `https://<tenant>.wd<N>.myworkdayjobs.com/<site>` from each company's careers
+# page (often visible in the browser URL bar after clicking through). Add as:
+#   - { name: X, ats: workday, tenant: X, site: Y, subdomain: wd1, tier: T }
+#
+# Big tech / SaaS (likely Workday):
+# - Snowflake, Cloudflare, HashiCorp, Atlassian, Asana, Airtable, Adobe,
+#   Salesforce, ServiceNow, Workday, Shopify, Spotify, Unity, Twitch (verified
+#   above on greenhouse), Snyk, Tailscale, Tanium, CrowdStrike, SentinelOne,
+#   Lacework, Tenable, Rubrik, Cohesity, Druva, Veza, Abnormal Security,
+#   Material Security
+#
+# Fintech (likely Workday or custom):
+# - Block, Plaid, Ramp, Mercury, Affirm, Robinhood, Chime, Kraken,
+#   Chainalysis, Anchorage Digital, AngelList
+#
+# Defense / national security (likely Workday):
+# - Anduril, Palantir, Shield AI, Saronic, Hadrian, Apex (Apex Space),
+#   Castelion, Helsing, Skydio, Epirus, Vannevar Labs, Lockheed Martin,
+#   Northrop Grumman, Raytheon, Boeing
+#
+# HFT / quant (mostly closed/internal systems):
+# - Citadel, Citadel Securities, Two Sigma, Hudson River Trading, DRW,
+#   IMC Trading, Optiver, Susquehanna (SIG), Akuna, Tower, Belvedere,
+#   Old Mission, Headlands Tech, Five Rings
+#
+# Hardware / accelerators (likely Workday or custom):
+# - AMD, Tesla, Groq, Modular, Etched, Rain AI, d-Matrix, Furiosa,
+#   Untether AI, Habana
+#
+# Robotics / autonomous (likely Workday or internal):
+# - Waymo (Clinch Talent), Cruise (GM), Aurora Innovation, Zoox (Amazon),
+#   1X, Skild AI, Physical Intelligence, Sanctuary AI, Agility Robotics,
+#   Diligent Robotics, Boston Dynamics, Locus, Symbotic, Covariant,
+#   Applied Intuition, Path Robotics, Bear Robotics
+#
+# Biotech-AI (mostly custom or Workday):
+# - Recursion, insitro, Atomic AI, Generate Biomedicines, Enveda, Owkin,
+#   Tempus AI, Schrodinger
+#
+# Climate / energy:
+# - Form Energy, Commonwealth Fusion, Helion, Sublime Systems
+#
+# AI infra unresolved:
+# - Replicate, Lightning AI, Chroma, Qdrant, Zilliz/Milvus, Codeium/Windsurf,
+#   Sourcegraph, Tabnine, Tinybird, dbt Labs, Outerbounds, W&B, Arize, Glean,
+#   Stability AI, AI21 Labs, Sakana AI, Adept (likely paused), World Labs,
+#   SSI, Midjourney (custom), Luma AI
+
+filters:
+  role_include_extra: []
+  role_exclude_extra: []
+  locations_include_extra:
+    - "Anywhere"
+  sponsorship_strict: true
