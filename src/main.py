@@ -5,6 +5,7 @@ import asyncio
 import logging
 import os
 import sys
+from datetime import datetime, timezone
 from pathlib import Path
 
 import httpx
@@ -119,6 +120,42 @@ async def _async_main(args: argparse.Namespace) -> int:
         state.finish_run(run_id, jobs_fetched=len(fetched), jobs_new=0, jobs_notified=0)
         return 0
 
+    if args.replay_since:
+        # One-shot backfill path: post to Discord every accepted job whose
+        # posted_at >= args.replay_since, regardless of seen-state. Useful right
+        # after bootstrap when the user wants today's postings to actually surface.
+        try:
+            since = datetime.strptime(args.replay_since, "%Y-%m-%d").replace(tzinfo=timezone.utc)
+        except ValueError:
+            log.error("--replay-since must be YYYY-MM-DD, got %r", args.replay_since)
+            return 2
+
+        replay_jobs = [j for j in accepted if j.posted_at and j.posted_at >= since]
+        log.info("replay-since=%s: %d/%d accepted jobs are posted on/after that date",
+                 args.replay_since, len(replay_jobs), len(accepted))
+
+        # Make sure these rows exist in seen so reaction sync works on them later.
+        existing = state.get_open_ids()
+        for j in replay_jobs:
+            if j.id not in existing:
+                state.insert(j, notified=False)
+
+        notified_count = 0
+        if replay_jobs:
+            channel_id = os.environ.get("DISCORD_CHANNEL_ID", "")
+            if not channel_id:
+                log.error("DISCORD_CHANNEL_ID env var not set; skipping replay notify")
+                return 2
+            async with httpx.AsyncClient(http2=True) as client:
+                msg_map = await post_jobs(client, channel_id, replay_jobs)
+            for jid, mid in msg_map.items():
+                state.mark_notified(jid, mid)
+            notified_count = len(msg_map)
+            log.info("replay: notified %d/%d jobs to Discord", notified_count, len(replay_jobs))
+
+        state.finish_run(run_id, jobs_fetched=len(fetched), jobs_new=0, jobs_notified=notified_count)
+        return 0
+
     # Compute new vs existing vs closed
     accepted_ids = {j.id for j in accepted}
     open_ids = state.get_open_ids()
@@ -167,6 +204,7 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--db", default=DEFAULT_DB, help="path to jobs.db")
     p.add_argument("--bootstrap", action="store_true", help="insert all current jobs as notified=1; do not send to Discord")
     p.add_argument("--dry-run", action="store_true", help="print would-be notifications; no DB writes, no Discord posts")
+    p.add_argument("--replay-since", metavar="YYYY-MM-DD", help="one-shot: post to Discord every accepted job with posted_at >= this date, regardless of seen-state")
     args = p.parse_args(argv)
 
     if not Path(args.config).exists():

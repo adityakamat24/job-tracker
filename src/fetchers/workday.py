@@ -1,13 +1,16 @@
 from __future__ import annotations
 
 import asyncio
-from datetime import datetime, timezone
+import re
+from datetime import datetime, timedelta, timezone
 
 import httpx
 
 from ..models import ATS, CompanyEntry, Job
 from ..utils import html_strip
 from .base import Fetcher
+
+_DAYS_AGO = re.compile(r"posted\s+(\d+)\+?\s+days?\s+ago", re.IGNORECASE)
 
 # 1 req/sec per tenant — some Workday instances 403 above that.
 _TENANT_LOCKS: dict[str, asyncio.Semaphore] = {}
@@ -23,10 +26,23 @@ def _lock(tenant: str) -> asyncio.Semaphore:
 
 
 def _parse_iso(s: str | None) -> datetime | None:
+    """Workday's `postedOn` is usually human-readable: 'Posted Today', 'Posted
+    Yesterday', 'Posted 5 Days Ago', 'Posted 30+ Days Ago'. Map those onto a real
+    datetime so downstream filters / replay can compare. Falls back to ISO."""
     if not s:
         return None
+    s_trim = s.strip()
+    s_lower = s_trim.lower()
+    today = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
+    if s_lower in ("posted today", "today", "posted just now"):
+        return today
+    if s_lower in ("posted yesterday", "yesterday"):
+        return today - timedelta(days=1)
+    m = _DAYS_AGO.search(s_lower)
+    if m:
+        return today - timedelta(days=int(m.group(1)))
     try:
-        return datetime.fromisoformat(s.replace("Z", "+00:00")).astimezone(timezone.utc)
+        return datetime.fromisoformat(s_trim.replace("Z", "+00:00")).astimezone(timezone.utc)
     except ValueError:
         return None
 

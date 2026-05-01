@@ -9,6 +9,10 @@ on:
         description: "Bootstrap mode (no notifications, mark all current jobs as already-notified)"
         type: boolean
         default: false
+      replay_since:
+        description: "One-shot replay: post to Discord every accepted job posted on/after this date (YYYY-MM-DD). Leave blank for normal run."
+        type: string
+        default: ""
 
 permissions:
   contents: write   # required to commit jobs.db back
@@ -38,12 +42,14 @@ jobs:
         run: |
           if [[ "${{ inputs.bootstrap }}" == "true" ]]; then
             python -m src.main --bootstrap
+          elif [[ -n "${{ inputs.replay_since }}" ]]; then
+            python -m src.main --replay-since "${{ inputs.replay_since }}"
           else
             python -m src.main
           fi
 
       - name: Sync reactions
-        if: ${{ inputs.bootstrap != 'true' }}
+        if: ${{ inputs.bootstrap != 'true' && inputs.replay_since == '' }}
         env:
           DISCORD_BOT_TOKEN: ${{ secrets.DISCORD_BOT_TOKEN }}
           DISCORD_CHANNEL_ID: ${{ secrets.DISCORD_CHANNEL_ID }}
