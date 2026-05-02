@@ -58,7 +58,10 @@ jobs:
         env:
           DISCORD_BOT_TOKEN: ${{ secrets.DISCORD_BOT_TOKEN }}
           DISCORD_CHANNEL_ID: ${{ secrets.DISCORD_CHANNEL_ID }}
-        run: python -m src.purge_recent --since-hours "${{ inputs.purge_hours }}"
+        # Channel-direct purge: walks Discord history, deletes bot-authored
+        # messages within the window. Doesn't depend on jobs.db state — works
+        # even when the prior workflow was cancelled before persisting message_ids.
+        run: python -m src.purge_channel --since-hours "${{ inputs.purge_hours }}"
 
       - name: Sync reactions
         if: ${{ inputs.bootstrap != 'true' && inputs.replay_since == '' && (inputs.purge_hours == '' || inputs.purge_hours == '0') }}
