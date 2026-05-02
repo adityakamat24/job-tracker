@@ -15,6 +15,26 @@ SENIORITY_EXCLUDE = re.compile(
     re.IGNORECASE,
 )
 
+# Numbered seniority levels — title like "Machine Learning Engineer 4",
+# "Software Engineer III", "MLE 5", "SDE III", "L5 Backend Engineer".
+# Levels 3+ in arabic OR roman OR L-prefix are senior. Levels 1-2 stay
+# acceptable (most new-grad numbered roles are "Engineer 1" / "Engineer II").
+# spec §15.8 specifically calls this out for III.
+NUMBERED_LEVEL_EXCLUDE = re.compile(
+    r"\b("
+    r"(?:engineer|scientist|developer|architect|swe|sde|mle|sre|researcher|analyst)"
+    r"\s*"
+    r"(?:I{3,}|IV|VI{0,3}|IX|X)\b"   # roman: III, IV, V, VI, VII, VIII, IX, X
+    r"|"
+    r"(?:engineer|scientist|developer|architect|swe|sde|mle|sre|researcher|analyst)"
+    r"\s*"
+    r"[3-9]\b"                          # arabic: Engineer 3..9
+    r"|"
+    r"\bL[3-9]\b|\bL1[0-9]\b"          # L3..L19 (Google/Meta-style)
+    r")",
+    re.IGNORECASE,
+)
+
 
 SENIORITY_INCLUDE_HINTS = re.compile(
     r"\b("
@@ -43,5 +63,7 @@ def passes_seniority(title: str) -> bool:
         return False
     cleaned = _MTS_CARVEOUT.sub("", title)
     if SENIORITY_EXCLUDE.search(cleaned):
+        return False
+    if NUMBERED_LEVEL_EXCLUDE.search(cleaned):
         return False
     return True

@@ -30,6 +30,18 @@ Patterns to remember and rules to follow when working on this project. Update af
 
 **How to apply:** Cache `total` from the first page if you want a hard cap; otherwise just keep paging until the response array shrinks.
 
+## "Engineer 4" / "Engineer III" / "Engineer L5" titles slip past keyword-only seniority filters
+**Rule:** Numbered seniority levels — arabic (3-9), roman (III-X), and L-prefix (L3+) — must be in the seniority exclude list. They're invisible to the standard "senior/staff/lead/manager" word-list because the level IS the seniority signal at companies like Adobe (uses 1-5), Google/Meta (uses L3-L7), Amazon (uses SDE I-III).
+
+**Why:** Adobe's "Machine Learning Engineer 4" job — JD says "5+ years experience" — sailed past my seniority filter because the title has no "Senior" word. Same trap for "Software Engineer III" (spec §15.8 actually called this out — "III as borderline; default reject" — but I forgot to wire it up).
+
+**How to apply:** Add to seniority exclude:
+- `engineer|scientist|developer|architect|swe|sde|mle|sre|researcher|analyst` followed by:
+  - `I{3,}|IV|V|VI|VII|VIII|IX|X` (roman 3-10)
+  - `[3-9]` (arabic 3-9; preserve I/II and 1/2 as new-grad-acceptable)
+- Standalone `L[3-9]` or `L1[0-9]` (Google/Meta level naming)
+- Anchor each role-word match with whitespace + level so we don't catch unrelated digits ("Engineer for AI 2026 Cohort" should still pass).
+
 ## Spec regex patterns need unit verification, not blind trust
 **Rule:** Even when the spec says "copy verbatim", run the patterns through hand-crafted positive/negative cases before declaring the filter done.
 
