@@ -240,6 +240,9 @@ companies:
   - { name: CrowdStrike,         ats: workday,    tenant: crowdstrike, site: crowdstrikecareers, subdomain: wd5, tier: 2 }
   - { name: Boeing,              ats: workday,    tenant: boeing,      site: EXTERNAL_CAREERS,   subdomain: wd1, tier: 2 }
   - { name: Target,              ats: workday,    tenant: target,      site: targetcareers,      subdomain: wd5, tier: 3 }
+  - { name: Salesforce,          ats: workday,    tenant: salesforce,  site: External_Career_Site, subdomain: wd12, tier: 2 }
+  - { name: Adobe,               ats: workday,    tenant: adobe,       site: external_experienced, subdomain: wd5,  tier: 2 }
+  - { name: Walmart,             ats: workday,    tenant: walmart,     site: WalmartExternal,      subdomain: wd5,  tier: 3 }
 
   # ============================================================================
   # === TIER 3: smaller / less-known but reputable ==============================
