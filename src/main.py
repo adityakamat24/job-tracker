@@ -23,6 +23,22 @@ log = logging.getLogger(__name__)
 DEFAULT_CONFIG = "companies.yaml"
 DEFAULT_DB = "jobs.db"
 
+# Safety cap: a normal run that wants to notify more than this many jobs is
+# almost certainly a misconfiguration (new sources added without bootstrap, or
+# something else wrong). Refuse to flood; mark them all as notified=1 instead
+# so the next run is quiet, and require explicit `--bootstrap` or manual
+# investigation. Bootstrap mode + auto-bootstrap (first-touch) are exempt.
+MAX_NOTIFY_PER_RUN = 50
+
+
+def _source_key(job_id: str) -> str:
+    """Turn `greenhouse:anthropic:1234` into `greenhouse:anthropic`. Used to
+    match a job back to its CompanyEntry's (ats, slug) pair."""
+    parts = job_id.split(":", 2)
+    if len(parts) < 2:
+        return job_id
+    return f"{parts[0]}:{parts[1]}"
+
 
 def _setup_logging() -> None:
     logging.basicConfig(
@@ -183,40 +199,74 @@ async def _async_main(args: argparse.Namespace) -> int:
     new_ids = accepted_ids - open_ids
     closed_ids = open_ids - accepted_ids
 
-    # Insert new (mark notified upfront in bootstrap)
+    # First-touch detection: if a source (ats:slug) has zero rows in `seen`,
+    # this is its very first appearance. Pinging its entire backlog would
+    # flood the channel. Auto-absorb instead: insert as notified=1, no Discord.
+    # Eliminates the "you forgot to bootstrap when adding new companies" trap.
+    known_sources = state.get_known_source_keys()
     new_jobs = [j for j in accepted if j.id in new_ids]
+    auto_bootstrap_jobs = []
+    real_new_jobs = []
     for j in new_jobs:
+        if _source_key(j.id) not in known_sources:
+            auto_bootstrap_jobs.append(j)
+        else:
+            real_new_jobs.append(j)
+
+    if auto_bootstrap_jobs:
+        first_touch_sources = sorted({_source_key(j.id) for j in auto_bootstrap_jobs})
+        log.info("first-touch sources auto-bootstrapping (%d jobs across %d sources): %s",
+                 len(auto_bootstrap_jobs), len(first_touch_sources), first_touch_sources)
+        for j in auto_bootstrap_jobs:
+            state.insert(j, notified=True)
+
+    # Insert real-new with notified flag determined by --bootstrap
+    for j in real_new_jobs:
         state.insert(j, notified=args.bootstrap)
 
-    # bulk_update_last_seen UPDATEs `last_seen=now, closed_at=NULL`. Apply to
-    # ALL accepted ids (not just currently-open) so a previously-closed job
-    # that reappears gets its closed_at cleared on the same cycle it's
-    # re-notified. Otherwise closed_at sticks and the job re-pings every cycle.
+    # Refresh last_seen / clear closed_at on every accepted id (not just open),
+    # so a previously-closed job that reappears gets cleared on the same cycle
+    # it's re-notified.
     state.bulk_update_last_seen(accepted_ids)
     state.bulk_close(closed_ids)
 
+    # Safety cap: even after first-touch protection, refuse to ping more than
+    # MAX_NOTIFY_PER_RUN in a single normal run. If this trips, something's
+    # wrong (broken filter, new ATS adapter, etc.) — mark them all notified to
+    # prevent flood and surface in logs for manual investigation.
     notified_count = 0
     if args.bootstrap:
-        log.info("bootstrap: inserted %d new (notified=1, no Discord)", len(new_jobs))
-        notified_count = 0
-    elif new_jobs:
+        total_inserted = len(auto_bootstrap_jobs) + len(real_new_jobs)
+        log.info("bootstrap: inserted %d new (auto=%d + explicit=%d), no Discord",
+                 total_inserted, len(auto_bootstrap_jobs), len(real_new_jobs))
+    elif real_new_jobs and len(real_new_jobs) > MAX_NOTIFY_PER_RUN:
+        log.error(
+            "SAFETY CAP TRIPPED: %d real-new jobs > MAX_NOTIFY_PER_RUN=%d. "
+            "Refusing to flood Discord. Marking all as notified=1 silently. "
+            "Investigate: did filter logic change? new ATS adapter? "
+            "Trigger workflow with bootstrap=true to re-baseline if expected.",
+            len(real_new_jobs), MAX_NOTIFY_PER_RUN,
+        )
+        state.mark_notified_no_message([j.id for j in real_new_jobs])
+    elif real_new_jobs:
         channel_id = os.environ.get("DISCORD_CHANNEL_ID", "")
         if not channel_id:
             log.error("DISCORD_CHANNEL_ID env var not set; skipping notify")
         else:
             async with httpx.AsyncClient(http2=True) as client:
-                msg_map = await post_jobs(client, channel_id, new_jobs)
+                msg_map = await post_jobs(client, channel_id, real_new_jobs)
             for jid, mid in msg_map.items():
                 state.mark_notified(jid, mid)
             notified_count = len(msg_map)
-            log.info("notified %d/%d new jobs to Discord", notified_count, len(new_jobs))
+            log.info("notified %d/%d real-new jobs to Discord (auto-bootstrapped %d)",
+                     notified_count, len(real_new_jobs), len(auto_bootstrap_jobs))
     else:
-        log.info("no new jobs to notify")
+        log.info("no real-new jobs to notify (auto-bootstrapped %d)", len(auto_bootstrap_jobs))
 
     state.finish_run(
         run_id,
         jobs_fetched=len(fetched),
-        jobs_new=len(new_jobs),
+        jobs_new=len(real_new_jobs),
         jobs_notified=notified_count,
     )
     return 0

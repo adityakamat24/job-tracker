@@ -128,6 +128,19 @@ class State:
                 [(i,) for i in ids],
             )
 
+    def get_known_source_keys(self) -> set[str]:
+        """Returns set of "ats:slug" strings that already have at least one row
+        in seen. Used to detect first-touch sources that should auto-bootstrap
+        instead of pinging their entire backlog."""
+        with self._txn() as conn:
+            rows = conn.execute("SELECT DISTINCT id FROM seen").fetchall()
+        keys: set[str] = set()
+        for r in rows:
+            parts = r["id"].split(":", 2)
+            if len(parts) >= 2:
+                keys.add(f"{parts[0]}:{parts[1]}")
+        return keys
+
     def mark_applied(self, job_id: str) -> None:
         with self._txn() as conn:
             conn.execute(

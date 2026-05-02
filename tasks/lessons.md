@@ -30,6 +30,15 @@ Patterns to remember and rules to follow when working on this project. Update af
 
 **How to apply:** Cache `total` from the first page if you want a hard cap; otherwise just keep paging until the response array shrinks.
 
+## Adding a new ATS source must never flood the channel
+**Rule:** Don't depend on user discipline ("remember to bootstrap when adding companies"). Auto-detect first-touch sources and silently absorb them.
+
+**Why:** Twice in two days, a user added new companies and triggered a normal cron run, which treated every still-open job at those companies (months-old listings included) as "new" and tried to ping all of them. 200+ Discord messages floods the channel and overwhelms the user. Manual bootstrap discipline doesn't scale across multiple add-companies sessions.
+
+**How to apply:** Before computing new-vs-existing in `main.py`, query `state.get_known_source_keys()` (a set of `"ats:slug"` strings derived from the namespaced job ID prefixes already in seen). For any new_job whose source key isn't in known_sources, insert as `notified=True` immediately — bypass Discord entirely. Log it as "first-touch source auto-bootstrapping". The first real cron tick after adding a source becomes a silent absorption, not a flood.
+
+**Second line of defense:** A `MAX_NOTIFY_PER_RUN` cap (default 50) trips if a normal run still wants to notify too many jobs even after first-touch protection. On trip: mark all as notified=1 silently, log loudly, force operator investigation. Bootstrap mode is exempt from the cap.
+
 ## "Engineer 4" / "Engineer III" / "Engineer L5" titles slip past keyword-only seniority filters
 **Rule:** Numbered seniority levels — arabic (3-9), roman (III-X), and L-prefix (L3+) — must be in the seniority exclude list. They're invisible to the standard "senior/staff/lead/manager" word-list because the level IS the seniority signal at companies like Adobe (uses 1-5), Google/Meta (uses L3-L7), Amazon (uses SDE I-III).
 
