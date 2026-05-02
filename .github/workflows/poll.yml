@@ -13,6 +13,10 @@ on:
         description: "One-shot replay: post to Discord every accepted job posted on/after this date (YYYY-MM-DD). Leave blank for normal run."
         type: string
         default: ""
+      purge_hours:
+        description: "EMERGENCY: delete bot's Discord messages whose first_seen is within last N hours. Skips fetch+filter+notify entirely. Set to 0 for normal run."
+        type: string
+        default: "0"
 
 permissions:
   contents: write   # required to commit jobs.db back
@@ -36,6 +40,7 @@ jobs:
       - run: pip install -r requirements.txt
 
       - name: Fetch + filter + notify
+        if: ${{ inputs.purge_hours == '' || inputs.purge_hours == '0' }}
         env:
           DISCORD_BOT_TOKEN: ${{ secrets.DISCORD_BOT_TOKEN }}
           DISCORD_CHANNEL_ID: ${{ secrets.DISCORD_CHANNEL_ID }}
@@ -48,8 +53,15 @@ jobs:
             python -m src.main
           fi
 
+      - name: Purge recent Discord messages
+        if: ${{ inputs.purge_hours != '' && inputs.purge_hours != '0' }}
+        env:
+          DISCORD_BOT_TOKEN: ${{ secrets.DISCORD_BOT_TOKEN }}
+          DISCORD_CHANNEL_ID: ${{ secrets.DISCORD_CHANNEL_ID }}
+        run: python -m src.purge_recent --since-hours "${{ inputs.purge_hours }}"
+
       - name: Sync reactions
-        if: ${{ inputs.bootstrap != 'true' && inputs.replay_since == '' }}
+        if: ${{ inputs.bootstrap != 'true' && inputs.replay_since == '' && (inputs.purge_hours == '' || inputs.purge_hours == '0') }}
         env:
           DISCORD_BOT_TOKEN: ${{ secrets.DISCORD_BOT_TOKEN }}
           DISCORD_CHANNEL_ID: ${{ secrets.DISCORD_CHANNEL_ID }}
