@@ -41,7 +41,28 @@ async def _fetch_all(config: Config) -> list[Job]:
     flat: list[Job] = []
     for batch in results:
         flat.extend(batch)
-    return flat
+    return _dedupe_cross_source(flat)
+
+
+def _dedupe_cross_source(jobs: list[Job]) -> list[Job]:
+    """Same role can appear across multiple sources (direct ATS + a curated
+    GitHub list, etc.). Collapse by (company, title) — case-insensitive — and
+    prefer the entry with a non-empty description so downstream filters
+    (sponsorship in particular) have something to work with."""
+    bucket: dict[tuple[str, str], Job] = {}
+    for j in jobs:
+        key = (j.company.strip().lower(), j.title.strip().lower())
+        existing = bucket.get(key)
+        if existing is None:
+            bucket[key] = j
+            continue
+        if not existing.description and j.description:
+            bucket[key] = j
+    deduped = list(bucket.values())
+    if len(deduped) < len(jobs):
+        log.info("cross-source dedupe: %d → %d (collapsed %d duplicates)",
+                 len(jobs), len(deduped), len(jobs) - len(deduped))
+    return deduped
 
 
 async def _backfill_workday_descriptions(jobs: list[Job]) -> None:

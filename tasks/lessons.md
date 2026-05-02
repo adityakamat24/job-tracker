@@ -39,6 +39,27 @@ Patterns to remember and rules to follow when working on this project. Update af
 
 **How to apply:** For any pattern in `src/filters/`, write at least ~5 hand-crafted (input, expected) pairs and run them as part of the verify step. Add new pairs whenever a real-world miss surfaces.
 
+## Curated GitHub job lists are a high-leverage shortcut for new-grad SWE coverage
+**Rule:** Don't try to verify every YC startup individually. SimplifyJobs/New-Grad-Positions and vanshb03/New-Grad-2026 between them already curate ~900 active new-grad SWE roles, updated multiple times daily. A `github_list` fetcher that parses the README markdown gives you company coverage that direct ATS scraping never will (most small startups use iCIMS, BambooHR, etc. that we don't support).
+
+**Why:** During the v2 expansion, agents brainstormed ~150 candidate companies and verified ~80. Adding the 2 GitHub lists ALSO surfaced ~900 SWE roles, of which ~500 were unique after cross-source dedupe — a 5× boost from one extra fetcher.
+
+**How to apply:** When coverage feels thin, look at what curated lists exist on GitHub for your job category. Markdown table or HTML `<table>` parsing is ~50 LOC. Trade-off: no description body → sponsorship filter degrades to pass-through → rely on title-level emoji flags (🇺🇸 / 🛂) and curator quality.
+
+## SimplifyJobs uses HTML `<table>` not markdown pipes
+**Rule:** When parsing curated README tables, support BOTH markdown pipe-tables and HTML `<table>` syntax. Don't assume one format.
+
+**Why:** vanshb03/New-Grad-2026 uses standard markdown `| col | col |` rows. SimplifyJobs/New-Grad-Positions uses inline `<table>/<tr>/<td>` HTML elements with style attributes (the GitHub README renderer accepts both). A markdown-only parser silently returns 0 jobs from SimplifyJobs.
+
+**How to apply:** Try markdown parser first; if it returns no rows, fall back to a regex-based HTML `<tr>/<td>` extractor. Pattern: `<tr>...</tr>` then `<t[dh]>...</t[dh]>` for cells. Strip inner HTML (`<strong>`, `<a>`, `<img>`) when extracting cell text.
+
+## Workday's `externalPath` already starts with `/job/` for detail URLs
+**Rule:** Build detail URLs as `f"{base}{external_path}"`, not `f"{base}/job{external_path}"`. The `/job/` prefix is already in `externalPath`.
+
+**Why:** Workday's detail endpoint at `/wday/cxs/<tenant>/<site>/job/<...>` returns 406 Not Acceptable if you double-prefix to `.../job/job/<...>`. NVIDIA's detail backfill silently failed across all jobs until this was caught.
+
+**How to apply:** Defensive: `suffix = path if path.startswith("/job") else f"/job{path}"`.
+
 ## Workable's widget API doesn't expose job descriptions
 **Rule:** Don't rely on the sponsorship filter for Workable jobs. The widget API at `apply.workable.com/api/v1/widget/accounts/<token>` returns title + location + URL but no description body — the description is loaded via authenticated XHR after page render.
 

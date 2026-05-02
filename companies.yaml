@@ -1,14 +1,17 @@
 # Edit this file to add/remove companies. Each entry needs an `ats` and the
 # fields that ATS requires:
-#   greenhouse / ashby / lever / workable  →  token
-#   workday                                →  tenant + site (+ optional subdomain, default wd1)
+#   greenhouse / ashby / lever / workable / smartrecruiters  →  token
+#   workday                                                  →  tenant + site (+ optional subdomain, default wd1)
+#   github_list                                              →  repo (+ optional branch, default 'main')
 #
 # Hand-verify a token by hitting the public endpoint before committing:
-#   greenhouse:  https://boards-api.greenhouse.io/v1/boards/<token>/jobs
-#   ashby:       https://api.ashbyhq.com/posting-api/job-board/<token>
-#   lever:       https://api.lever.co/v0/postings/<token>?mode=json
-#   workable:    https://apply.workable.com/api/v1/widget/accounts/<token>
-#   workday:     POST https://<tenant>.<subdomain>.myworkdayjobs.com/wday/cxs/<tenant>/<site>/jobs
+#   greenhouse:       https://boards-api.greenhouse.io/v1/boards/<token>/jobs
+#   ashby:            https://api.ashbyhq.com/posting-api/job-board/<token>
+#   lever:            https://api.lever.co/v0/postings/<token>?mode=json
+#   workable:         https://apply.workable.com/api/v1/widget/accounts/<token>
+#   smartrecruiters:  https://api.smartrecruiters.com/v1/companies/<token>/postings
+#   workday:          POST https://<tenant>.<subdomain>.myworkdayjobs.com/wday/cxs/<tenant>/<site>/jobs
+#   github_list:      https://raw.githubusercontent.com/<repo>/<branch>/<path>
 #
 # Tier is used for sort order in the Discord digest and embed color
 # (1 = blue, 2 = green, 3 = grey).
@@ -26,6 +29,7 @@ companies:
   - { name: Cohere,              ats: ashby,      token: cohere,                tier: 1 }
   - { name: Perplexity,          ats: ashby,      token: perplexity,            tier: 1 }
   - { name: Hugging Face,        ats: workable,   token: huggingface,           tier: 1 }
+  - { name: DeepMind,            ats: greenhouse, token: deepmind,              tier: 1 }
 
   # Inference infra / serving / GPU clouds
   - { name: Modal,               ats: ashby,      token: modal,                 tier: 1 }
@@ -55,6 +59,31 @@ companies:
   - { name: Brex,                ats: greenhouse, token: brex,                  tier: 1 }
   - { name: Coinbase,            ats: greenhouse, token: coinbase,              tier: 1 }
   - { name: Jane Street,         ats: greenhouse, token: janestreet,            tier: 1 }
+  - { name: Webflow,             ats: greenhouse, token: webflow,               tier: 1 }
+  - { name: Zapier,              ats: ashby,      token: zapier,                tier: 1 }
+  - { name: Visa,                ats: smartrecruiters, token: visa,             tier: 1 }
+
+  # Crypto / Web3 top
+  - { name: Alchemy,             ats: ashby,      token: alchemy,               tier: 1 }
+  - { name: Uniswap Labs,        ats: ashby,      token: uniswap,               tier: 1 }
+  - { name: Phantom,             ats: ashby,      token: phantom,               tier: 1 }
+  - { name: Polygon Labs,        ats: ashby,      token: polygon-labs,          tier: 1 }
+  - { name: Gemini,              ats: greenhouse, token: gemini,                tier: 1 }
+  - { name: Ripple,              ats: greenhouse, token: ripple,                tier: 1 }
+  - { name: ConsenSys,           ats: greenhouse, token: consensys,             tier: 1 }
+  - { name: OpenSea,             ats: ashby,      token: opensea,               tier: 1 }
+  - { name: Paradigm,            ats: ashby,      token: paradigm,              tier: 1 }
+  - { name: a16z crypto,         ats: ashby,      token: a16z,                  tier: 1 }
+  - { name: Ledger,              ats: ashby,      token: ledger,                tier: 1 }
+
+  # Climate / industrial top
+  - { name: Form Energy,         ats: ashby,      token: formenergy,            tier: 1 }
+  - { name: Helion Energy,       ats: ashby,      token: helion,                tier: 1 }
+  - { name: Twelve,              ats: ashby,      token: twelve,                tier: 1 }
+
+  # Robotics / biotech-AI top
+  - { name: Recursion Pharmaceuticals, ats: greenhouse, token: recursionpharmaceuticals, tier: 1 }
+  - { name: Applied Intuition,   ats: greenhouse, token: appliedintuition,      tier: 1 }
 
   # ============================================================================
   # === TIER 2: well-funded, established eng-heavy ==============================
@@ -165,6 +194,53 @@ companies:
   - { name: 1Password,           ats: ashby,      token: 1password,             tier: 2 }
   - { name: Zscaler,             ats: greenhouse, token: zscaler,               tier: 2 }
 
+  # YC + recent dev tools / agent platforms (tier 2)
+  - { name: Galileo,             ats: greenhouse, token: galileo,               tier: 2 }
+  - { name: Greptile,            ats: ashby,      token: greptile,              tier: 2 }
+  - { name: Vellum,              ats: ashby,      token: vellum,                tier: 2 }
+  - { name: Mintlify,            ats: ashby,      token: mintlify,              tier: 2 }
+  - { name: Letta,               ats: ashby,      token: letta,                 tier: 2 }
+  - { name: Substack,            ats: ashby,      token: substack,              tier: 2 }
+  - { name: Sift,                ats: ashby,      token: sift,                  tier: 2 }
+  - { name: Conduit,             ats: ashby,      token: conduit,               tier: 2 }
+  - { name: Lovable,             ats: ashby,      token: lovable,               tier: 2 }
+  - { name: Glide,               ats: ashby,      token: glide,                 tier: 2 }
+  - { name: Otter,               ats: greenhouse, token: otter,                 tier: 2 }
+  - { name: Typeform,            ats: greenhouse, token: typeform,              tier: 2 }
+  - { name: Latitude,            ats: greenhouse, token: latitude,              tier: 2 }
+
+  # Crypto / Web3 (tier 2)
+  - { name: 0x Protocol,         ats: ashby,      token: 0x,                    tier: 2 }
+  - { name: QuickNode,           ats: ashby,      token: quicknode,             tier: 2 }
+  - { name: TRM Labs,            ats: ashby,      token: trm-labs,              tier: 2 }
+  - { name: Polymarket,          ats: ashby,      token: polymarket,            tier: 2 }
+  - { name: Orca,                ats: ashby,      token: orca,                  tier: 2 }
+  - { name: Injective,           ats: ashby,      token: injective,             tier: 2 }
+  - { name: Avalanche Foundation, ats: ashby,     token: avalanche-foundation,  tier: 2 }
+  - { name: Ava Labs,            ats: ashby,      token: ava-labs,              tier: 2 }
+  - { name: Symbiotic,           ats: ashby,      token: symbiotic,             tier: 2 }
+
+  # Climate / industrial (tier 2)
+  - { name: Carbon Direct,       ats: greenhouse, token: carbondirect,          tier: 2 }
+  - { name: Persefoni AI,        ats: greenhouse, token: persefoniaiinc,        tier: 2 }
+  - { name: Boston Metal,        ats: workable,   token: boston-metal,          tier: 2 }
+
+  # Robotics / autonomous / biotech-AI (tier 2)
+  - { name: Pony.ai,             ats: workable,   token: pony-dot-ai,           tier: 2 }
+  - { name: Roivant Sciences,    ats: greenhouse, token: roivantsciences,       tier: 2 }
+  - { name: Iterative Health,    ats: greenhouse, token: iterativehealth,       tier: 2 }
+  - { name: Abridge,             ats: ashby,      token: Abridge,               tier: 2 }
+  - { name: Kepler,              ats: ashby,      token: kepler-ai,             tier: 2 }
+  - { name: Cradle,              ats: ashby,      token: cradlebio,             tier: 2 }
+
+  # Late-discovered (post-agent verification)
+  - { name: Mercury,             ats: greenhouse, token: mercury,               tier: 2 }
+  - { name: Kraken,              ats: ashby,      token: kraken,                tier: 2 }
+  - { name: Anchorage Digital,   ats: lever,      token: anchorage,             tier: 2 }
+  - { name: CrowdStrike,         ats: workday,    tenant: crowdstrike, site: crowdstrikecareers, subdomain: wd5, tier: 2 }
+  - { name: Boeing,              ats: workday,    tenant: boeing,      site: EXTERNAL_CAREERS,   subdomain: wd1, tier: 2 }
+  - { name: Target,              ats: workday,    tenant: target,      site: targetcareers,      subdomain: wd5, tier: 3 }
+
   # ============================================================================
   # === TIER 3: smaller / less-known but reputable ==============================
   # ============================================================================
@@ -178,6 +254,20 @@ companies:
   - { name: Airbnb,              ats: greenhouse, token: airbnb,                tier: 3 }
   - { name: Figma,               ats: greenhouse, token: figma,                 tier: 3 }
   - { name: KRAFTON,             ats: greenhouse, token: krafton,               tier: 3 }
+  - { name: AltScore,            ats: greenhouse, token: altscore,              tier: 3 }
+  - { name: Capy,                ats: ashby,      token: capy,                  tier: 3 }
+  - { name: Arcade,              ats: ashby,      token: arcade,                tier: 3 }
+
+  # ============================================================================
+  # === CURATED LISTS (GitHub) — broad new-grad SWE coverage ===================
+  # ============================================================================
+  # These pull from public, frequently-updated curated job lists. They surface
+  # roles from companies whose ATS we don't otherwise have configured (often
+  # using iCIMS, Workday with non-obvious tenants, or custom sites). The
+  # cross-source dedupe in main.py drops duplicates with our direct ATS fetches.
+  # No description body available — these jobs bypass the sponsorship filter.
+  - { name: "SimplifyJobs/New-Grad",  ats: github_list, repo: "SimplifyJobs/New-Grad-Positions", branch: dev,  tier: 2 }
+  - { name: "vanshb03/New-Grad-2026", ats: github_list, repo: "vanshb03/New-Grad-2026",          branch: main, tier: 2 }
 
 # ==============================================================================
 # === TODO: verify tokens / find correct ATS ===================================

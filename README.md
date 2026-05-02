@@ -1,8 +1,8 @@
 # job-tracker
 
-Polls ~125 companies' ATS endpoints every 30 minutes via GitHub Actions, filters for new-grad inference / MLSys / SWE / GPU roles in the US that are sponsorship-friendly, and posts hits to a Discord channel. State is persisted in `jobs.db` (committed back to the repo). React ✅ on a Discord post to mark a job applied.
+Polls ~190 companies + curated job lists every 30 minutes via GitHub Actions, filters for new-grad inference / MLSys / SWE / GPU roles in the US that are sponsorship-friendly, and posts hits to a Discord channel. State is persisted in `jobs.db` (committed back to the repo). React ✅ on a Discord post to mark a job applied.
 
-Coverage spans frontier AI labs, inference infra, GPU clouds, hardware/accelerators, vector DBs, dev tools, robotics, autonomous, biotech-AI, big-tech SaaS, fintech, security, and HFT — across 5 ATSes (Greenhouse, Ashby, Lever, Workday, Workable).
+Coverage spans frontier AI labs, inference infra, GPU clouds, hardware/accelerators, vector DBs, dev tools, robotics, autonomous, biotech-AI, big-tech SaaS, fintech, security, crypto/Web3, climate/industrial, defense, and YC startups — across 7 source types (Greenhouse, Ashby, Lever, Workday, Workable, SmartRecruiters, plus curated GitHub lists like SimplifyJobs/New-Grad-Positions and vanshb03/New-Grad-2026).
 
 Spec lives in [`SPEC.md`](SPEC.md). Internal workflow rules live in [`CLAUDE.md`](CLAUDE.md).
 
@@ -101,7 +101,8 @@ All filters live in `src/filters/`. Regexes are tested against hand-crafted case
 
 ## Known v1 limitations
 
-- **Workable jobs have no description.** Workable's widget API exposes title + location but not the body. Sponsorship filter passes empty descriptions, so Workable jobs (e.g. Hugging Face) skip the sponsorship gate. Title-fallback location filter is what catches non-US Workable roles.
+- **Workable + GitHub-list jobs have no description.** Both Workable's widget API and the curated GitHub README tables expose title + location but not the body. Sponsorship filter passes empty descriptions, so these jobs skip the sponsorship gate. Title-fallback location filter is what catches non-US roles. SimplifyJobs's 🇺🇸 (US-citizen-only) and 🛂 (no-sponsorship) emoji flags ARE respected at the title-filter stage.
+- **Cross-source dedupe is by `(company, title)` lowercase match.** A direct ATS hit on Anthropic's "Software Engineer, Inference" and a SimplifyJobs row for the same role get collapsed to one entry, preferring the ATS one (it has a description for sponsorship filtering). Slight title variations slip past dedupe — minor noise.
 - **Per-tenant Workday discovery is manual.** When a `<tenant>.wd<N>.myworkdayjobs.com/<site>` URL isn't predictable, the bootstrap surfaces a 404 in the logs and the company is silently skipped. The TODO block at the bottom of `companies.yaml` lists known Workday-hosted companies that need their `tenant`+`site`+`subdomain` filled in by hand (visit each careers page; the URL bar shows the values once you click into a job).
 
 ## What's parked (v2+)

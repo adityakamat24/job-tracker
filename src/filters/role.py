@@ -40,10 +40,19 @@ ROLE_EXCLUDE = re.compile(
     re.IGNORECASE,
 )
 
+# Curated GitHub job lists (SimplifyJobs etc.) flag visa-restrictive roles in the
+# title with these emojis. Reject them at the cheapest filter stage so they never
+# even reach Discord.
+#   🇺🇸 = US citizenship required
+#   🛂 = does not offer sponsorship
+ROLE_EXCLUDE_EMOJI = re.compile(r"[\U0001F1FA\U0001F1F8🛂]")
+
 
 def passes_role(title: str, *, extra_include: list[str] | None = None,
                 extra_exclude: list[str] | None = None) -> bool:
     if not title:
+        return False
+    if ROLE_EXCLUDE_EMOJI.search(title):
         return False
     if ROLE_EXCLUDE.search(title):
         return False

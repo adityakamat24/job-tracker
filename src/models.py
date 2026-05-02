@@ -11,6 +11,8 @@ class ATS(str, Enum):
     LEVER = "lever"
     WORKDAY = "workday"
     WORKABLE = "workable"
+    SMARTRECRUITERS = "smartrecruiters"
+    GITHUB_LIST = "github_list"
 
 
 @dataclass
@@ -38,13 +40,17 @@ class CompanyEntry:
     ats: ATS
     tier: int = 3
     notes: str = ""
-    # greenhouse / ashby / lever
+    # greenhouse / ashby / lever / workable / smartrecruiters
     token: str | None = None
     # workday
     tenant: str | None = None
     site: str | None = None
     subdomain: str = "wd1"
+    # github_list
+    repo: str | None = None
+    branch: str = "main"
+    path: str = "README.md"
 
     def slug(self) -> str:
         """Used in the namespaced job ID — distinguishes companies that share an ATS."""
-        return self.token or self.tenant or self.name.lower().replace(" ", "-")
+        return self.token or self.tenant or (self.repo or "").replace("/", "_") or self.name.lower().replace(" ", "-")

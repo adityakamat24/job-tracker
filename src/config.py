@@ -14,19 +14,25 @@ log = logging.getLogger(__name__)
 
 class _CompanyRow(BaseModel):
     name: str
-    ats: Literal["greenhouse", "ashby", "lever", "workday", "workable"]
+    ats: Literal["greenhouse", "ashby", "lever", "workday", "workable", "smartrecruiters", "github_list"]
     tier: int = 3
     notes: str = ""
     token: str | None = None
     tenant: str | None = None
     site: str | None = None
     subdomain: str = "wd1"
+    repo: str | None = None
+    branch: str = "main"
+    path: str = "README.md"
 
     @model_validator(mode="after")
     def _check_per_ats_fields(self) -> "_CompanyRow":
         if self.ats == "workday":
             if not self.tenant or not self.site:
                 raise ValueError("workday entries require both 'tenant' and 'site'")
+        elif self.ats == "github_list":
+            if not self.repo:
+                raise ValueError("github_list entries require 'repo' (e.g. 'SimplifyJobs/New-Grad-Positions')")
         else:
             if not self.token:
                 raise ValueError(f"{self.ats} entries require 'token'")
@@ -73,6 +79,9 @@ class Config:
                 tenant=parsed.tenant,
                 site=parsed.site,
                 subdomain=parsed.subdomain,
+                repo=parsed.repo,
+                branch=parsed.branch,
+                path=parsed.path,
             ))
 
         log.info("loaded %d company entries", len(entries))

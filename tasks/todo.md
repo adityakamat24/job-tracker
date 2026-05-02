@@ -86,3 +86,32 @@ End-to-end run was ~3 min wall-clock — most of that is Workday's 1 req/sec ser
 - Workday-tenant discovery for the TODO block in companies.yaml (Anduril, Palantir, Snowflake, Cloudflare, HashiCorp, Atlassian, Block, Plaid, CrowdStrike, etc. — all known Workday users, just need someone to grab `tenant`/`site` from each careers URL)
 - HFT firms (Citadel, Two Sigma, HRT, etc.) mostly use closed/internal systems; would need custom scrapers
 - Workable description fetching (would need spi/v3 + per-tenant API token; out of scope)
+
+---
+
+## Coverage expansion v2 (188 sources)
+
+### What changed
+- Added **SmartRecruiters** adapter (`src/fetchers/smartrecruiters.py`) — paginates `https://api.smartrecruiters.com/v1/companies/<token>/postings`, defers per-job description fetch via the `ref` URL only for jobs that survive the title filter.
+- Added **GitHubList** "fetcher" (`src/fetchers/github_list.py`) — pulls curated job lists from public GitHub READMEs. Supports BOTH markdown pipe-tables (vanshb03) and HTML `<table>` tags (SimplifyJobs). Handles `↳` continuation rows, skips closed (🔒) entries, parses relative ages (`5d`, `2mo`) and absolute dates (`Apr 25`).
+- Added **cross-source dedupe** in `main.py` — collapses `(company, title)` collisions across fetchers, preferring entries with non-empty descriptions.
+- Added **emoji rejections** to role filter — 🇺🇸 (US-citizen-only) and 🛂 (no-sponsorship) flagged in title get rejected at the cheapest filter stage.
+- 5 parallel research agents covered: YC W24/W25/S24/S25 batches, crypto/Web3, climate/industrial, deeper robotics/biotech-AI, Workday tenant discovery.
+
+### Coverage stats
+- companies.yaml: **188 sources** across 7 ATS types (greenhouse 83, ashby 91, lever 4, workable 3, workday 4, smartrecruiters 1, github_list 2).
+- Funnel (latest dry-run): fetched 19,943 → cross-source dedupe → 16,690 → role 3,477 → seniority 1,839 → location 1,480 → final **1,430 candidates** (up from 933 in v1).
+- Wall-clock: ~6m17s (still inside 10-min CI budget).
+
+### Bug fixes during expansion
+- `src/fetchers/workday.py`: detail URL was double-prefixing `/job/job/...` and 406'ing — fixed by detecting if `externalPath` already starts with `/job`.
+- 3 stale tokens removed/corrected (Plus.ai unresolvable, Unify unresolvable, Arcade moved greenhouse → ashby).
+- 4 lessons added to `tasks/lessons.md` (curated-list shortcut, HTML table parsing, Workday URL fix, Workable description gap).
+
+### Notable additions worth highlighting
+- DeepMind (greenhouse), Visa (smartrecruiters), Mercury, Webflow, Zapier
+- Crypto top tier: Alchemy, Uniswap Labs, Phantom, Polygon, Gemini, Ripple, ConsenSys, OpenSea, Paradigm, a16z crypto, Ledger
+- Climate top tier: Form Energy, Helion, Twelve, Boston Metal
+- Robotics/biotech: Recursion, Applied Intuition, Roivant, Iterative Health, Abridge, Cradle, Pony.ai
+- Workday wins: CrowdStrike, Boeing, Target
+- Late discovery: Kraken (ashby), Anchorage Digital (lever)
