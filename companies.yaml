@@ -334,3 +334,7 @@ filters:
   locations_include_extra:
     - "Anywhere"
   sponsorship_strict: true
+  # Drop jobs whose posted_at is older than this many days. Stops year-old /
+  # months-old listings from flooding Discord when a new source is first added
+  # or when an ATS surfaces stale postings. Set to 0 to disable.
+  max_age_days: 14

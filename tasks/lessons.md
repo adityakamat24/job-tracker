@@ -108,3 +108,10 @@ Patterns to remember and rules to follow when working on this project. Update af
 **Why:** `or` (Oregon) is a substring of "Bangalore". `ga` (Georgia) → "Bangalore". `nd` (North Dakota) → "London". `mo` (Missouri) → "Remote". `al` (Alabama) → "Bangalore". A naive `if hub in piece` check passes London, Bangalore, and Remote as US locations.
 
 **How to apply:** Use word-boundary regex matching: `re.search(rf"(?<![a-z]){re.escape(hub)}(?![a-z])", text, re.IGNORECASE)`. Plain `\b` is unreliable for two-letter ascii tokens because the boundary can fire inside other words too.
+
+## First-touch auto-bootstrap doesn't gate by job age
+**Rule:** Filter on `posted_at` early in the pipeline. Don't rely on first-touch / seen-state to keep stale postings off Discord.
+
+**Why:** Greenhouse / Workday boards keep year-old reqs that are still technically open. The first time a new source is added (or a previously-zeroed source reappears), auto-bootstrap inserts the whole backlog as `notified=1`, but if the safety cap doesn't trip, normal runs surface anything in `accepted - open_ids` — which can include a year-old req that just slipped past dedupe. User saw "a year ago" / "7 months ago" listings flooding the Discord channel because no filter looked at `posted_at`.
+
+**How to apply:** `passes_age()` runs before role/seniority in `passes_title_stages`. Default cutoff = 14 days, configurable via `filters.max_age_days` in `companies.yaml`. Jobs with no parseable `posted_at` are kept (don't punish a fetcher gap by dropping the whole company); the role / location / sponsorship gates still cover those rows.

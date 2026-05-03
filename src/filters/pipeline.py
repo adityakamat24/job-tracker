@@ -4,6 +4,7 @@ import logging
 from dataclasses import dataclass
 
 from ..models import Job
+from .age import passes_age
 from .location import passes_location
 from .role import passes_role
 from .seniority import passes_seniority
@@ -15,6 +16,7 @@ log = logging.getLogger(__name__)
 @dataclass
 class FilterStats:
     fetched: int = 0
+    rejected_age: int = 0
     rejected_role: int = 0
     rejected_seniority: int = 0
     rejected_location: int = 0
@@ -22,9 +24,12 @@ class FilterStats:
     accepted: int = 0
 
 
-def passes_title_stages(job: Job, *, role_extra_include: list[str] | None = None,
+def passes_title_stages(job: Job, *, max_age_days: int,
+                        role_extra_include: list[str] | None = None,
                         role_extra_exclude: list[str] | None = None) -> str | None:
     """Run the cheap title-only filters. Returns reject-reason or None if accepted so far."""
+    if not passes_age(job.posted_at, max_age_days):
+        return "age"
     if not passes_role(job.title, extra_include=role_extra_include, extra_exclude=role_extra_exclude):
         return "role"
     if not passes_seniority(job.title):

@@ -44,6 +44,10 @@ class _FiltersBlock(BaseModel):
     role_exclude_extra: list[str] = Field(default_factory=list)
     locations_include_extra: list[str] = Field(default_factory=list)
     sponsorship_strict: bool = True
+    # Drop jobs whose posted_at is older than this many days. Jobs without a
+    # parseable posted_at are kept (the title/location/sponsorship filters still
+    # gate them). 0 disables the filter.
+    max_age_days: int = 14
 
 
 class _Root(BaseModel):

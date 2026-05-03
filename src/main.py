@@ -113,13 +113,17 @@ async def _async_main(args: argparse.Namespace) -> int:
     role_exc = config.filters.role_exclude_extra
     loc_extra = config.filters.locations_include_extra
     sp_strict = config.filters.sponsorship_strict
+    max_age = config.filters.max_age_days
 
     # Stage 1: title-only filters (cheap)
     after_title: list[Job] = []
-    rejected_role = rejected_seniority = 0
+    rejected_age = rejected_role = rejected_seniority = 0
     for j in fetched:
-        reason = passes_title_stages(j, role_extra_include=role_inc, role_extra_exclude=role_exc)
-        if reason == "role":
+        reason = passes_title_stages(j, max_age_days=max_age,
+                                     role_extra_include=role_inc, role_extra_exclude=role_exc)
+        if reason == "age":
+            rejected_age += 1
+        elif reason == "role":
             rejected_role += 1
         elif reason == "seniority":
             rejected_seniority += 1
@@ -142,9 +146,10 @@ async def _async_main(args: argparse.Namespace) -> int:
             accepted.append(j)
 
     log.info(
-        "filter funnel: fetched=%d → role_ok=%d (-%d) → seniority_ok=%d (-%d) → location_ok=%d (-%d) → final=%d (-%d)",
+        "filter funnel: fetched=%d → age_ok=%d (-%d) → role_ok=%d (-%d) → seniority_ok=%d (-%d) → location_ok=%d (-%d) → final=%d (-%d)",
         len(fetched),
-        len(fetched) - rejected_role, rejected_role,
+        len(fetched) - rejected_age, rejected_age,
+        len(fetched) - rejected_age - rejected_role, rejected_role,
         len(after_title), rejected_seniority,
         len(after_title) - rejected_location, rejected_location,
         len(accepted), rejected_sponsorship,
