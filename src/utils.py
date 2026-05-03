@@ -106,7 +106,7 @@ US_GENERIC: frozenset[str] = frozenset({
 
 
 NON_US_BLOCKERS: frozenset[str] = frozenset({
-    # cities
+    # cities — original
     "london", "berlin", "paris", "munich", "amsterdam", "dublin",
     "tel aviv", "tokyo", "singapore", "bangalore", "bengaluru",
     "hyderabad", "mumbai", "delhi", "pune", "shanghai", "beijing",
@@ -116,10 +116,19 @@ NON_US_BLOCKERS: frozenset[str] = frozenset({
     "lima", "quito", "caracas", "barcelona", "madrid", "milan",
     "rome", "stockholm", "copenhagen", "oslo", "helsinki", "warsaw",
     "prague", "budapest", "vienna", "zurich", "geneva",
+    # cities — added (slipped through previously)
+    "bucharest", "hamburg", "noida", "aarhus", "belgrade",
+    "frankfurt", "stuttgart", "düsseldorf", "dusseldorf", "cologne",
+    "lisbon", "athens", "sofia", "kraków", "krakow",
+    "manchester", "edinburgh", "glasgow", "belfast",
+    "gurgaon", "gurugram", "chennai", "kolkata", "ahmedabad",
+    "manila", "bangkok", "jakarta", "kuala lumpur", "taipei",
+    "dubai", "abu dhabi", "doha", "riyadh",
+    "kyiv", "kiev", "auckland", "wellington",
     # regions
     "europe", "emea", "apac", "latam", "asia", "south america",
     "central america", "middle east",
-    # countries / codes
+    # countries / codes — original
     "uk", "united kingdom", "germany", "france", "india", "china",
     "japan", "canada", "can", "australia", "ireland", "netherlands",
     "spain", "italy", "switzerland", "sweden", "poland", "brazil",
@@ -129,4 +138,13 @@ NON_US_BLOCKERS: frozenset[str] = frozenset({
     "israel", "south korea", "korea", "thailand", "vietnam",
     "indonesia", "philippines", "malaysia", "south africa", "nigeria",
     "kenya", "egypt", "uae", "saudi arabia",
+    # countries — added
+    "denmark", "norway", "finland", "iceland",
+    "serbia", "croatia", "slovenia", "slovakia", "czech republic",
+    "czechia", "estonia", "latvia", "lithuania", "bulgaria",
+    "ukraine", "belarus", "russia",
+    "belgium", "luxembourg", "austria",
+    "taiwan", "new zealand",
+    "pakistan", "bangladesh", "nepal", "sri lanka",
+    "qatar", "bahrain", "kuwait", "oman", "jordan", "lebanon",
 })

@@ -35,7 +35,15 @@ ROLE_EXCLUDE = re.compile(
     r"recruiter|talent|people\s+ops|"
     r"finance|accounting|legal|paralegal|"
     r"customer\s+success|customer\s+support|"
-    r"executive\s+assistant|admin\b"
+    r"executive\s+assistant|admin\b|"
+    # US-government clearance roles — gated on citizenship, not sponsorable.
+    # Keyword often shows up in the title (defense / fed contractors), so we
+    # reject at the cheap title stage instead of waiting for the description.
+    r"ts\/sci|ts\/ssbi|"
+    r"polygraph|w\/poly|w\s+poly|"
+    r"top\s+secret|"
+    r"secret\s+clearance|"
+    r"active\s+(ts|secret|clearance)"
     r")\b",
     re.IGNORECASE,
 )
