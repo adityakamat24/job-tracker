@@ -4,13 +4,17 @@ import re
 
 SENIORITY_EXCLUDE = re.compile(
     r"\b("
-    r"senior|sr\.|"
+    r"senior|sr|"  # bare 'sr' — matches 'Sr.', 'Sr ', 'SR' alike (the trailing \b
+                   # in this regex matches after 'r' regardless of period). The
+                   # earlier `sr\.` failed when followed by space because both `.`
+                   # and ` ` are non-word chars, leaving no word boundary.
     r"staff|principal|"
     r"\blead\b|tech\s+lead|"
     r"director|head\s+of|"
     r"manager|management|engineering\s+manager|em\b|"
     r"\bvp\b|vice\s+president|"
-    r"chief|executive"
+    r"chief|executive|"
+    r"distinguished|fellow"   # rare but real top-IC ladders (Walmart, MSFT, Sun)
     r")\b",
     re.IGNORECASE,
 )
